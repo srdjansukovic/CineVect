@@ -1,5 +1,7 @@
 from configuration import model, index
 
+print(model.max_seq_length)
+
 sentences = [
     {
         "id": "1",

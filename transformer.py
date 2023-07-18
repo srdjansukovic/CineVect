@@ -60,7 +60,5 @@ for i, sentence in enumerate(sentences):
 
 sentence_tuples = [(s["id"], s["embedding"], s["metadata"]) for s in sentences]
 
-#Print the embeddings
 for sentence in sentences:
-    # print(sentence["id"], sentence["embedding"], sentence["metadata"])
     index.upsert(vectors=sentence_tuples, batch_size=5)
