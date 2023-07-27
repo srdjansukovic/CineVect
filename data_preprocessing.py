@@ -1,6 +1,5 @@
 import pandas as pd
 import json, re
-from collections import Counter
 
 df = pd.read_csv(filepath_or_buffer='data/movies.csv')
 df = df.drop('Wiki Page', axis=1)
@@ -13,12 +12,20 @@ origins_path = 'data/origins.json'
 with open(origins_path, 'w') as json_file:
   json.dump(unique_origins, json_file, indent=4)
 
-unique_actors = df['Cast'].str.split(r',| and ').explode().str.strip().unique().tolist()
+def split_and_join(s):
+    parts = [x.strip() for x in re.split(',|and', s)]
+    return ','.join(parts)
+
+df['Cast'] = df['Cast'].apply(split_and_join)
+df['Director'] = df['Director'].apply(split_and_join)
+
+unique_actors = df['Cast'].str.split(r',').explode().str.strip().unique().tolist()
 actors_path = 'data/actors.json'
 with open(actors_path, 'w') as json_file:
   json.dump(unique_actors, json_file, indent=4)
 
-unique_directors = df['Director'].str.split(r',| and ').explode().str.strip().unique().tolist()
+
+unique_directors = df['Director'].str.split(r',').explode().str.strip().unique().tolist()
 directors_path = 'data/directors.json'
 with open(directors_path, 'w') as json_file:
   json.dump(unique_directors, json_file, indent=4)
@@ -96,12 +103,12 @@ def extract_genres(genre_string):
 df['Genre'] = df['Genre'].apply(extract_genres)
 df = df.dropna(subset=['Genre'], how='any', axis=0)
 
-clean_movies_path = 'data/clean_movies.csv'
-
-df.to_csv(clean_movies_path, index=False)
-
 unique_genres = df['Genre'].str.split(r',| and ').explode().str.strip().unique().tolist()
 genres_path = 'data/genres.json'
 with open(genres_path, 'w') as json_file:
   json.dump(unique_genres, json_file, indent=4)
 
+df.replace({r'[^\x00-\x7F]+':' '}, regex=True, inplace=True)
+
+clean_movies_path = 'data/clean_movies.csv'
+df.to_csv(clean_movies_path, index=False)
