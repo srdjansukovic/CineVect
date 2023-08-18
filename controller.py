@@ -1,26 +1,26 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from query import create_embedding_from_query, query_search
+import json
 
 app = Flask(__name__)
-
-@app.route('/')
-def hello():
-    return "Hello, Flask!"
+CORS(app)
 
 @app.route('/query', methods=['POST'])
 def post_example():
     try:
         request_body = request.get_json()
 
-        query = request_body.get('query')
-        filter = request_body.get('filter')
-        n_results = request_body.get('n_results')
+        print('Received request: ', request_body)
 
-        if not query or not filter or not n_results:
-            return jsonify({"error": "Sentence, filter and n_results are required fields."}), 400
+        query = request_body.get('queryText')
+        n_results = 3
+
+        if not query:
+            return jsonify({"error": "Query text is required."}), 400
 
         embedding = create_embedding_from_query(query=query)
-        pinecone_filter = parse_filter(filter)
+        pinecone_filter = parse_filter(request_body)
         query_response = query_search(embedding=embedding, filter=pinecone_filter, n_results=n_results)
 
         return query_response.to_dict()
@@ -29,4 +29,27 @@ def post_example():
         return jsonify({"error": "An error occurred.", "details": str(e)}), 500
     
 def parse_filter(user_filter):
-    return {key: {"$eq": value} for key, value in user_filter.items()}
+    pinecone_filter = {}
+
+    if user_filter.get("genres"):
+        pinecone_filter["genre"] = {"$in": user_filter["genres"]}
+
+    if user_filter.get("minYear") and user_filter.get("maxYear"):
+        year_range = {}
+        if user_filter.get("minYear"):
+            year_range["$gte"] = int(user_filter["minYear"])
+        if user_filter.get("maxYear"):
+            year_range["$lte"] = int(user_filter["maxYear"])
+        pinecone_filter["year"] = year_range
+
+    if user_filter.get("actors"):
+        pinecone_filter["cast"] = {"$in": user_filter["actors"]}
+
+    if user_filter.get("origins"):
+        pinecone_filter["origin"] = {"$in": user_filter["origins"]}
+
+    if user_filter.get("directors"):
+        pinecone_filter["director"] = {"$in": user_filter["directors"]}
+
+    print('Created pinecone filter: ', json.dumps(pinecone_filter, indent=2))
+    return pinecone_filter

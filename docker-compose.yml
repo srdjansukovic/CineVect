@@ -4,10 +4,25 @@ services:
 
   cinevect:
     container_name: cinevect
-    image: cinevect:1.1
+    image: cinevect:1.2
     ports:
       - "5000:5000"
     environment:
       - PINECONE_API_KEY=${PINECONE_API_KEY}
       - PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}
       - PINECONE_INDEX=${PINECONE_INDEX}
+    networks:
+      - cinevect-network
+
+  cinevect-ui:
+    container_name: cinevect-ui
+    image: cinevect-ui-nginx:1.0
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - cinevect-network
+
+networks:
+  cinevect-network:
