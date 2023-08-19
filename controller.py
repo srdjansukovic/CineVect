@@ -11,10 +11,8 @@ def post_example():
     try:
         request_body = request.get_json()
 
-        print('Received request: ', request_body)
-
         query = request_body.get('queryText')
-        n_results = 3
+        n_results = 4
 
         if not query:
             return jsonify({"error": "Query text is required."}), 400
