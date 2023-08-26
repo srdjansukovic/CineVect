@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from query import create_embedding_from_query, query_search
-import json
+from query import create_embedding_from_query, pinecone_query, weaviate_query
+from query_parser import convert_to_pinecone_syntax, convert_to_weaviate_syntax
+from response_parser import convert_weaviate_response
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/query', methods=['POST'])
-def post_example():
+@app.route('/query/pinecone', methods=['POST'])
+def pinecone_search():
     try:
         request_body = request.get_json()
 
@@ -18,36 +19,31 @@ def post_example():
             return jsonify({"error": "Query text is required."}), 400
 
         embedding = create_embedding_from_query(query=query)
-        pinecone_filter = parse_filter(request_body)
-        query_response = query_search(embedding=embedding, filter=pinecone_filter, n_results=n_results)
+        pinecone_filter = convert_to_pinecone_syntax(request_body)
+        query_response = pinecone_query(embedding=embedding, filter=pinecone_filter, n_results=n_results)
 
         return query_response.to_dict()
 
     except Exception as e:
         return jsonify({"error": "An error occurred.", "details": str(e)}), 500
     
-def parse_filter(user_filter):
-    pinecone_filter = {}
+@app.route('/query/weaviate', methods=['POST'])
+def weaviate_search():
+    try:
+        request_body = request.get_json()
 
-    if user_filter.get("genres"):
-        pinecone_filter["genre"] = {"$in": user_filter["genres"]}
+        query = request_body.get('queryText')
+        n_results = 4
 
-    if user_filter.get("minYear") and user_filter.get("maxYear"):
-        year_range = {}
-        if user_filter.get("minYear"):
-            year_range["$gte"] = int(user_filter["minYear"])
-        if user_filter.get("maxYear"):
-            year_range["$lte"] = int(user_filter["maxYear"])
-        pinecone_filter["year"] = year_range
+        if not query:
+            return jsonify({"error": "Query text is required."}), 400
 
-    if user_filter.get("actors"):
-        pinecone_filter["cast"] = {"$in": user_filter["actors"]}
+        embedding = create_embedding_from_query(query=query)
+        weaviate_filter = convert_to_weaviate_syntax(request_body)
+        query_response = weaviate_query(embedding=embedding, filter=weaviate_filter, n_results=n_results)
 
-    if user_filter.get("origins"):
-        pinecone_filter["origin"] = {"$in": user_filter["origins"]}
+        return convert_weaviate_response(query_response)
 
-    if user_filter.get("directors"):
-        pinecone_filter["director"] = {"$in": user_filter["directors"]}
-
-    print('Created pinecone filter: ', json.dumps(pinecone_filter, indent=2))
-    return pinecone_filter
+    except Exception as e:
+        return jsonify({"error": "An error occurred.", "details": str(e)}), 500
+    

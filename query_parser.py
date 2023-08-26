@@ -1,0 +1,96 @@
+import json
+
+def convert_to_pinecone_syntax(user_filter):
+    pinecone_filter = {}
+
+    if user_filter.get("genres"):
+        pinecone_filter["genre"] = {"$in": user_filter["genres"]}
+
+    if user_filter.get("minYear") and user_filter.get("maxYear"):
+        year_range = {}
+        if user_filter.get("minYear"):
+            year_range["$gte"] = int(user_filter["minYear"])
+        if user_filter.get("maxYear"):
+            year_range["$lte"] = int(user_filter["maxYear"])
+        pinecone_filter["year"] = year_range
+
+    if user_filter.get("actors"):
+        pinecone_filter["cast"] = {"$in": user_filter["actors"]}
+
+    if user_filter.get("origins"):
+        pinecone_filter["origin"] = {"$in": user_filter["origins"]}
+
+    if user_filter.get("directors"):
+        pinecone_filter["director"] = {"$in": user_filter["directors"]}
+
+    print('Created pinecone filter: ', json.dumps(pinecone_filter, indent=2))
+    return pinecone_filter
+
+def convert_to_weaviate_syntax(request_body):
+    weaviate_syntax = {
+        "operator": "And",
+        "operands": []
+    }
+
+    if "genres" in request_body and request_body["genres"]:
+        genre_filter = {
+            "path": ["genre"],
+            "operator": "ContainsAny",
+            "valueTextList": request_body["genres"]
+        }
+        weaviate_syntax["operands"].append(genre_filter)
+
+    if "minYear" in request_body and request_body["minYear"]:
+        if "maxYear" in request_body and request_body["maxYear"]:
+            year_filter = {
+                "operator": "And",
+                "operands": [
+                    {
+                        "path": ["year"],
+                        "operator": "GreaterThan",
+                        "valueInt": int(request_body["minYear"])
+                    },
+                    {
+                        "path": ["year"],
+                        "operator": "LessThan",
+                        "valueInt": int(request_body["maxYear"])
+                    }
+                ]
+            }
+            weaviate_syntax["operands"].append(year_filter)
+        else:
+            year_filter = {
+                "path": ["year"],
+                "operator": "GreaterThan",
+                "valueInt": int(request_body["minYear"])
+            }
+            weaviate_syntax["operands"].append(year_filter)
+
+    if "actors" in request_body and request_body["actors"]:
+        actors_filter = {
+            "path": ["cast"],
+            "operator": "ContainsAny",
+            "valueTextList": request_body["actors"]
+        }
+        weaviate_syntax["operands"].append(actors_filter)
+
+    if "origins" in request_body and request_body["origins"]:
+        origin_filter = {
+            "path": ["origin"],
+            "operator": "ContainsAny",
+            "valueTextList": request_body["origins"]
+        }
+        weaviate_syntax["operands"].append(origin_filter)
+
+    if "directors" in request_body and request_body["directors"]:
+        directors_filter = {
+            "path": ["director"],
+            "operator": "ContainsAny",
+            "valueTextList": request_body["directors"]
+        }
+        weaviate_syntax["operands"].append(directors_filter)
+    
+    print('Created weaviate filter: ', json.dumps(weaviate_syntax, indent=2))
+
+    return weaviate_syntax
+

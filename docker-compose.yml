@@ -11,18 +11,49 @@ services:
       - PINECONE_API_KEY=${PINECONE_API_KEY}
       - PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}
       - PINECONE_INDEX=${PINECONE_INDEX}
+      - WEAVIATE_CLIENT_URL=http://weaviate:8081
     networks:
       - cinevect-network
+    depends_on:
+      - weaviate
 
   cinevect-ui:
     container_name: cinevect-ui
-    image: cinevect-ui-nginx:1.0
+    image: cinevect-ui:1.2
     ports:
       - "8080:8080"
     environment:
       - NODE_ENV=production
     networks:
       - cinevect-network
+    depends_on:
+      - cinevect
+
+  weaviate:
+    container_name: weaviate
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8081'
+      - --scheme
+      - http
+    image: semitechnologies/weaviate:1.21.1
+    ports:
+      - 8081:8081
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    restart: on-failure:0
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'none'
+      CLUSTER_HOSTNAME: 'node1'
+    networks:
+      - cinevect-network
 
 networks:
   cinevect-network:
+volumes:
+  weaviate_data:
