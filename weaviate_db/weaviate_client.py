@@ -4,7 +4,7 @@ import weaviate
 from weaviate.exceptions import UnexpectedStatusCodeException
 
 parser = ConfigParser()
-parser.read('./configuration.ini')
+parser.read('./config/configuration.ini')
 
 weaviate_client_url = parser.get('weaviate', 'client_url', vars=os.environ)
 

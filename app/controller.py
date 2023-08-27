@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from query import create_embedding_from_query, pinecone_query, weaviate_query
-from query_parser import convert_to_pinecone_syntax, convert_to_weaviate_syntax
-from response_parser import convert_weaviate_response
+from query_common.query import create_embedding_from_query, pinecone_query, weaviate_query
+from query_common.query_parser import convert_to_pinecone_syntax, convert_to_weaviate_syntax
+from query_common.response_parser import convert_weaviate_response
 
 app = Flask(__name__)
 CORS(app)

@@ -4,7 +4,7 @@ services:
 
   cinevect:
     container_name: cinevect
-    image: cinevect:1.2
+    image: cinevect:latest
     ports:
       - "5000:5000"
     environment:
@@ -19,7 +19,7 @@ services:
 
   cinevect-ui:
     container_name: cinevect-ui
-    image: cinevect-ui:1.2
+    image: cinevect-ui:latest
     ports:
       - "8080:8080"
     environment:

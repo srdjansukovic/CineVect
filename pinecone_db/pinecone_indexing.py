@@ -1,20 +1,17 @@
 import pandas as pd
-from configuration import model, index
+from pinecone_client import index
+from embedding_models.sentence_transformers_model import model
 import json
-
 
 df = pd.read_csv(filepath_or_buffer='data/clean_movies.csv')
 df = df.reset_index() 
 
-print('Loaded file...')
+print('Done with loading dataframe')
 
-embeddings = model.encode([row['Plot'] for _ ,row in df.iterrows()]).tolist()
+with open('data/embeddings.json', 'r') as json_file:
+    embeddings = json.load(json_file)
 
-embeddings_path = 'data/embeddings.json'
-with open(embeddings_path, 'w') as json_file:
-  json.dump(embeddings, json_file, indent=4)
-
-print('Done with creating embeddings...')
+print('Done with loading embeddings')
 
 df = df.reset_index() 
 

@@ -32,28 +32,28 @@ def convert_to_weaviate_syntax(request_body):
         "operands": []
     }
 
-    if "genres" in request_body and request_body["genres"]:
+    if request_body.get("genres"):
         genre_filter = {
             "path": ["genre"],
             "operator": "ContainsAny",
-            "valueTextList": request_body["genres"]
+            "valueTextList": request_body.get("genres")
         }
         weaviate_syntax["operands"].append(genre_filter)
 
-    if "minYear" in request_body and request_body["minYear"]:
-        if "maxYear" in request_body and request_body["maxYear"]:
+    if "minYear" in request_body and request_body.get("minYear"):
+        if "maxYear" in request_body and request_body.get("maxYear"):
             year_filter = {
                 "operator": "And",
                 "operands": [
                     {
                         "path": ["year"],
                         "operator": "GreaterThan",
-                        "valueInt": int(request_body["minYear"])
+                        "valueInt": int(request_body.get("minYear"))
                     },
                     {
                         "path": ["year"],
                         "operator": "LessThan",
-                        "valueInt": int(request_body["maxYear"])
+                        "valueInt": int(request_body.get("maxYear"))
                     }
                 ]
             }
@@ -62,31 +62,31 @@ def convert_to_weaviate_syntax(request_body):
             year_filter = {
                 "path": ["year"],
                 "operator": "GreaterThan",
-                "valueInt": int(request_body["minYear"])
+                "valueInt": int(request_body.get("minYear"))
             }
             weaviate_syntax["operands"].append(year_filter)
 
-    if "actors" in request_body and request_body["actors"]:
+    if "actors" in request_body and request_body.get("actors"):
         actors_filter = {
             "path": ["cast"],
             "operator": "ContainsAny",
-            "valueTextList": request_body["actors"]
+            "valueTextList": request_body.get("actors")
         }
         weaviate_syntax["operands"].append(actors_filter)
 
-    if "origins" in request_body and request_body["origins"]:
+    if "origins" in request_body and request_body.get("origins"):
         origin_filter = {
             "path": ["origin"],
             "operator": "ContainsAny",
-            "valueTextList": request_body["origins"]
+            "valueTextList": request_body.get("origins")
         }
         weaviate_syntax["operands"].append(origin_filter)
 
-    if "directors" in request_body and request_body["directors"]:
+    if "directors" in request_body and request_body.get("directors"):
         directors_filter = {
             "path": ["director"],
             "operator": "ContainsAny",
-            "valueTextList": request_body["directors"]
+            "valueTextList": request_body.get("directors")
         }
         weaviate_syntax["operands"].append(directors_filter)
     
