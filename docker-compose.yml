@@ -12,6 +12,7 @@ services:
       - PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}
       - PINECONE_INDEX=${PINECONE_INDEX}
       - WEAVIATE_CLIENT_URL=http://weaviate:8081
+      - SENTENCE_TRANSFORMERS_MODEL=./all-mpnet-base-v2
     networks:
       - cinevect-network
     depends_on:

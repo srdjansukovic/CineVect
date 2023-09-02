@@ -8,7 +8,7 @@ df = df.reset_index()
 
 print('Done with loading dataframe')
 
-with open('data/embeddings.json', 'r') as json_file:
+with open('data/all-mpnet-base-v2.json', 'r') as json_file:
     embeddings = json.load(json_file)
 
 print('Done with loading embeddings')

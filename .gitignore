@@ -194,4 +194,5 @@ pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
 
-data/embeddings.json
+data/all-MiniLM-L6-v2.json
+data/all-mpnet-base-v2.json

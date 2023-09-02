@@ -1,5 +1,5 @@
 from pinecone_db.pinecone_client import index
-from models.sentence_transformers import model
+from embedding_models.sentence_transformers_model import model
 from weaviate_db.weaviate_client import client as weaviate_client
 
 def create_embedding_from_query(query):
