@@ -28,7 +28,7 @@ class_obj = {
             "name": "origin",
             "dataType": ["text"],
         },
-                {
+        {
             "name": "cast",
             "dataType": ["text[]"],
         },

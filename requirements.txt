@@ -7,3 +7,4 @@ pinecone-client==2.2.2
 pandas==2.0.3
 Flask-Cors==4.0.0
 weaviate-client==3.23.0
+qdrant-client==1.4.0
