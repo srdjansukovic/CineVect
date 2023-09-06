@@ -11,7 +11,10 @@ services:
       - PINECONE_API_KEY=${PINECONE_API_KEY}
       - PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}
       - PINECONE_INDEX=${PINECONE_INDEX}
-      - WEAVIATE_CLIENT_URL=http://weaviate:8081
+      - WEAVIATE_CLIENT_URL=${WEAVIATE_CLIENT_URL}
+      - WEAVIATE_API_KEY=${WEAVIATE_API_KEY}
+      - QDRANT_URL=${QDRANT_URL}
+      - QDRANT_API_KEY=${QDRANT_API_KEY}
       - SENTENCE_TRANSFORMERS_MODEL=./all-mpnet-base-v2
     networks:
       - cinevect-network
@@ -30,31 +33,5 @@ services:
     depends_on:
       - cinevect
 
-  weaviate:
-    container_name: weaviate
-    command:
-      - --host
-      - 0.0.0.0
-      - --port
-      - '8081'
-      - --scheme
-      - http
-    image: semitechnologies/weaviate:1.21.1
-    ports:
-      - 8081:8081
-    volumes:
-      - weaviate_data:/var/lib/weaviate
-    restart: on-failure:0
-    environment:
-      QUERY_DEFAULTS_LIMIT: 25
-      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
-      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
-      DEFAULT_VECTORIZER_MODULE: 'none'
-      CLUSTER_HOSTNAME: 'node1'
-    networks:
-      - cinevect-network
-
 networks:
   cinevect-network:
-volumes:
-  weaviate_data:

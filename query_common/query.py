@@ -1,6 +1,7 @@
 from pinecone_db.pinecone_client import index
 from embedding_models.sentence_transformers_model import model
 from weaviate_db.weaviate_client import client as weaviate_client
+from qdrant_db.qdrant_client import qdrant
 
 def create_embedding_from_query(query):
     return model.encode(query).tolist()
@@ -30,3 +31,12 @@ def weaviate_query(embedding, filter, n_results):
         response = base_query.do()
         
     return response
+
+def qdrant_query(embedding, filter, n_results):
+    return qdrant.search(
+        collection_name="movies",
+        query_vector=embedding,
+        with_payload=True,
+        query_filter=filter,
+        limit=n_results
+    )

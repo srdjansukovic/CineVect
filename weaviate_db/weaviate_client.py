@@ -7,9 +7,12 @@ parser = ConfigParser()
 parser.read('./config/configuration.ini')
 
 weaviate_client_url = parser.get('weaviate', 'client_url', vars=os.environ)
+weaviate_api_key = parser.get('weaviate', 'api_key', vars=os.environ)
+auth_config = weaviate.AuthApiKey(api_key=weaviate_api_key)
 
 client = weaviate.Client(
-    url = weaviate_client_url
+    url = weaviate_client_url,
+    auth_client_secret=auth_config
 )
 
 class_obj = {

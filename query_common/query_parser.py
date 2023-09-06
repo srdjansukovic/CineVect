@@ -1,4 +1,5 @@
 import json
+from qdrant_client import models
 
 def convert_to_pinecone_syntax(user_filter):
     pinecone_filter = {}
@@ -93,4 +94,41 @@ def convert_to_weaviate_syntax(request_body):
     print('Created weaviate filter: ', json.dumps(weaviate_syntax, indent=2))
 
     return weaviate_syntax
+
+def convert_to_qdrant_syntax(user_filter):
+    must = []
+    if user_filter.get("genres"):
+        must.append(models.FieldCondition(
+            key="genre",
+            match=models.MatchAny(any=user_filter["genres"])
+        ))
+    if user_filter.get("minYear") or user_filter.get("maxYear"):
+        must.append(models.FieldCondition(
+            key="year",
+            range=models.Range(
+                gte=user_filter.get("minYear"),
+                lte=user_filter.get("maxYear")
+            )
+        ))
+    if user_filter.get("actors"):
+        must.append(models.FieldCondition(
+            key="cast",
+            match=models.MatchAny(any=user_filter["actors"])
+        ))
+    if user_filter.get("origins"):
+        must.append(models.FieldCondition(
+            key="origin",
+            match=models.MatchAny(any=user_filter["origins"])
+        ))
+    if user_filter.get("directors"):
+        must.append(models.FieldCondition(
+            key="director",
+            match=models.MatchAny(any=user_filter["directors"])
+        ))
+    
+    qdrant_filter = models.Filter(
+        must=must
+    )
+
+    return qdrant_filter
 
