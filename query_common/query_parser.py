@@ -1,5 +1,9 @@
 import json
 from qdrant_client import models
+import datetime
+
+current_year = datetime.datetime.now().year
+minimum_year = 1800
 
 def convert_to_pinecone_syntax(user_filter):
     pinecone_filter = {}
@@ -7,12 +11,10 @@ def convert_to_pinecone_syntax(user_filter):
     if user_filter.get("genres"):
         pinecone_filter["genre"] = {"$in": user_filter["genres"]}
 
-    if user_filter.get("minYear") and user_filter.get("maxYear"):
+    if user_filter.get("minYear") or user_filter.get("maxYear"):
         year_range = {}
-        if user_filter.get("minYear"):
-            year_range["$gte"] = int(user_filter["minYear"])
-        if user_filter.get("maxYear"):
-            year_range["$lte"] = int(user_filter["maxYear"])
+        year_range["$gte"] = int(user_filter["minYear"] or minimum_year)
+        year_range["$lte"] = int(user_filter["maxYear"] or current_year)
         pinecone_filter["year"] = year_range
 
     if user_filter.get("actors"):
@@ -27,73 +29,65 @@ def convert_to_pinecone_syntax(user_filter):
     print('Created pinecone filter: ', json.dumps(pinecone_filter, indent=2))
     return pinecone_filter
 
-def convert_to_weaviate_syntax(request_body):
-    weaviate_syntax = {
+def convert_to_weaviate_syntax(user_filter):
+    weaviate_filter = {
         "operator": "And",
         "operands": []
     }
 
-    if request_body.get("genres"):
+    if user_filter.get("genres"):
         genre_filter = {
             "path": ["genre"],
             "operator": "ContainsAny",
-            "valueTextList": request_body.get("genres")
+            "valueTextList": user_filter.get("genres")
         }
-        weaviate_syntax["operands"].append(genre_filter)
+        weaviate_filter["operands"].append(genre_filter)
+    
+    if user_filter.get("minYear") or user_filter.get("maxYear"):
+        year_filter = {
+            "operator": "And",
+            "operands": [
+                {
+                    "path": ["year"],
+                    "operator": "GreaterThanEqual",
+                    "valueInt": int(user_filter.get("minYear") or minimum_year)
+                },
+                {
+                    "path": ["year"],
+                    "operator": "LessThanEqual",
+                    "valueInt": int(user_filter.get("maxYear") or current_year)
+                }
+            ]
+        }
+        weaviate_filter["operands"].append(year_filter)
 
-    if "minYear" in request_body and request_body.get("minYear"):
-        if "maxYear" in request_body and request_body.get("maxYear"):
-            year_filter = {
-                "operator": "And",
-                "operands": [
-                    {
-                        "path": ["year"],
-                        "operator": "GreaterThan",
-                        "valueInt": int(request_body.get("minYear"))
-                    },
-                    {
-                        "path": ["year"],
-                        "operator": "LessThan",
-                        "valueInt": int(request_body.get("maxYear"))
-                    }
-                ]
-            }
-            weaviate_syntax["operands"].append(year_filter)
-        else:
-            year_filter = {
-                "path": ["year"],
-                "operator": "GreaterThan",
-                "valueInt": int(request_body.get("minYear"))
-            }
-            weaviate_syntax["operands"].append(year_filter)
-
-    if "actors" in request_body and request_body.get("actors"):
+    if "actors" in user_filter and user_filter.get("actors"):
         actors_filter = {
             "path": ["cast"],
             "operator": "ContainsAny",
-            "valueTextList": request_body.get("actors")
+            "valueTextList": user_filter.get("actors")
         }
-        weaviate_syntax["operands"].append(actors_filter)
+        weaviate_filter["operands"].append(actors_filter)
 
-    if "origins" in request_body and request_body.get("origins"):
+    if "origins" in user_filter and user_filter.get("origins"):
         origin_filter = {
             "path": ["origin"],
             "operator": "ContainsAny",
-            "valueTextList": request_body.get("origins")
+            "valueTextList": user_filter.get("origins")
         }
-        weaviate_syntax["operands"].append(origin_filter)
+        weaviate_filter["operands"].append(origin_filter)
 
-    if "directors" in request_body and request_body.get("directors"):
+    if "directors" in user_filter and user_filter.get("directors"):
         directors_filter = {
             "path": ["director"],
             "operator": "ContainsAny",
-            "valueTextList": request_body.get("directors")
+            "valueTextList": user_filter.get("directors")
         }
-        weaviate_syntax["operands"].append(directors_filter)
+        weaviate_filter["operands"].append(directors_filter)
     
-    print('Created weaviate filter: ', json.dumps(weaviate_syntax, indent=2))
+    print('Created weaviate filter: ', json.dumps(weaviate_filter, indent=2))
 
-    return weaviate_syntax
+    return weaviate_filter
 
 def convert_to_qdrant_syntax(user_filter):
     must = []
@@ -106,8 +100,8 @@ def convert_to_qdrant_syntax(user_filter):
         must.append(models.FieldCondition(
             key="year",
             range=models.Range(
-                gte=user_filter.get("minYear"),
-                lte=user_filter.get("maxYear")
+                gte=user_filter.get("minYear") or minimum_year,
+                lte=user_filter.get("maxYear") or current_year
             )
         ))
     if user_filter.get("actors"):
