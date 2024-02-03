@@ -3,12 +3,12 @@ import pandas as pd
 from weaviate_client import client
 from weaviate.util import generate_uuid5
 
-df = pd.read_csv(filepath_or_buffer='data/clean_movies.csv')
+df = pd.read_csv(filepath_or_buffer='data/clean_movies_mini.csv')
 df = df.reset_index() 
 
 print('Done with loading dataframe')
 
-with open('data/all-mpnet-base-v2.json', 'r') as json_file:
+with open('data/embeddings-with-title-mini.json', 'r') as json_file:
     embeddings = json.load(json_file)
 
 print('Done with loading embeddings')

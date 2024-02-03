@@ -1,8 +1,8 @@
 docker-build:
 	@docker build -t cinevect:latest .
 
-run-weaviate:
-	@docker compose up weaviate
+create-embeddings:
+	@python embedding_models/create_embeddings.py
 
 weaviate-indexing:
 	@python weaviate_db/weaviate_indexing.py
@@ -15,3 +15,9 @@ pinecone-indexing:
 
 pinecone-cleanup:
 	@python pinecone_db/pinecone_cleanup.py
+
+qdrant-indexing:
+	@python qdrant_db/qdrant_indexing.py
+
+qdrant-cleanup:
+	@python qdrant_db/qdrant_cleanup.py

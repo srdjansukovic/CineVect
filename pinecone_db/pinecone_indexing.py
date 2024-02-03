@@ -7,7 +7,7 @@ df = df.reset_index()
 
 print('Done with loading dataframe')
 
-with open('data/all-mpnet-base-v2.json', 'r') as json_file:
+with open('data/embeddings-with-title.json', 'r') as json_file:
     embeddings = json.load(json_file)
 
 print('Done with loading embeddings')
@@ -18,7 +18,7 @@ sentence_tuples = [(f"{row['Title']} ({row['Release Year']})", embeddings[i], {"
 
 print('Created sentence tuples for pinecone indexing...')
 
-index.upsert(vectors=sentence_tuples, batch_size=200)
+index.upsert(vectors=sentence_tuples, batch_size=200, show_progress=True)
 
 print('Done with indexing...')
 
