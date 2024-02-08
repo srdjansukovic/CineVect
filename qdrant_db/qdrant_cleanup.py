@@ -1,3 +1,3 @@
-from qdrant_db.qdrant_client import qdrant
+from qdrant_clients import qdrant
 
 qdrant.delete_collection(collection_name="movies")

@@ -1,7 +1,7 @@
 from pinecone_db.pinecone_client import index
 from embedding_models.sentence_transformers_model import model
 from weaviate_db.weaviate_client import client as weaviate_client
-from qdrant_db.qdrant_client import qdrant
+from qdrant_db.qdrant_clients import qdrant
 
 def create_embedding_from_query(query):
     return model.encode(query).tolist()

@@ -1,4 +1,4 @@
-from qdrant_db.qdrant_client import qdrant
+from qdrant_clients import qdrant
 from qdrant_client import models
 import pandas as pd
 import json
@@ -11,12 +11,12 @@ qdrant.recreate_collection(
     )
 )
 
-df = pd.read_csv(filepath_or_buffer='data/clean_movies.csv')
+df = pd.read_csv(filepath_or_buffer='data/clean_movies_mini.csv')
 df = df.reset_index() 
 
 print('Done with loading dataframe')
 
-with open('data/all-mpnet-base-v2.json', 'r') as json_file:
+with open('data/embeddings-with-title-mini.json', 'r') as json_file:
     embeddings = json.load(json_file)
 
 print('Done with loading embeddings')
